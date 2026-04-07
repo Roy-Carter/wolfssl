@@ -2669,6 +2669,14 @@ AC_ARG_ENABLE([libevent],
     [ ENABLED_LIBEVENT=no ]
     )
 
+if test "$ENABLED_LIBEVENT" = "yes";
+then
+    PC_LIBEVENT_CFLAGS="-I\${includedir}/wolfssl -include wolfssl/openssl/ssl.h"
+else
+    PC_LIBEVENT_CFLAGS=""
+fi
+AC_SUBST([PC_LIBEVENT_CFLAGS])
+
 # OpenSSL Coexist
 AC_ARG_ENABLE([opensslcoexist],
     [AS_HELP_STRING([--enable-opensslcoexist],[Enable coexistence of wolfssl/openssl (default: disabled)])],
