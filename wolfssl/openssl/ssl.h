@@ -132,6 +132,21 @@
 #if !defined(OPENSSL_COEXIST) && \
     (defined(OPENSSL_EXTRA) || defined(OPENSSL_EXTRA_X509_SMALL))
 
+/* OpenSSL struct tag compatibility: third-party code (e.g. libevent) may
+ * forward-declare or reference the OpenSSL internal struct tags directly
+`. */
+#define ssl_st              WOLFSSL
+#define ssl_ctx_st          WOLFSSL_CTX
+#define ssl_method_st       WOLFSSL_METHOD
+#define ssl_session_st      WOLFSSL_SESSION
+#define x509_st             WOLFSSL_X509
+#define x509_store_st       WOLFSSL_X509_STORE
+#define x509_store_ctx_st   WOLFSSL_X509_STORE_CTX
+#define bio_st              WOLFSSL_BIO
+#define bio_method_st       WOLFSSL_BIO_METHOD
+#define buf_mem_st          WOLFSSL_BUF_MEM
+#define evp_pkey_st         WOLFSSL_EVP_PKEY
+
 typedef WOLFSSL          SSL;
 typedef WOLFSSL_SESSION  SSL_SESSION;
 typedef WOLFSSL_METHOD   SSL_METHOD;

@@ -2662,6 +2662,13 @@ AC_ARG_ENABLE([memcached],
     [ ENABLED_MEMCACHED=no ]
     )
 
+# libevent support
+AC_ARG_ENABLE([libevent],
+    [AS_HELP_STRING([--enable-libevent],[Enable libevent support. Enables OpenSSL compat and installs drop-in symlinks for headers, libs, and pkg-config (default: disabled)])],
+    [ ENABLED_LIBEVENT=$enableval ],
+    [ ENABLED_LIBEVENT=no ]
+    )
+
 # OpenSSL Coexist
 AC_ARG_ENABLE([opensslcoexist],
     [AS_HELP_STRING([--enable-opensslcoexist],[Enable coexistence of wolfssl/openssl (default: disabled)])],
@@ -2774,7 +2781,8 @@ if test "$ENABLED_LIBWEBSOCKETS" = "yes" || test "$ENABLED_OPENVPN" = "yes" || \
    test "$ENABLED_KRB" = "yes" || test "$ENABLED_CHRONY" = "yes" || \
    test "$ENABLED_FFMPEG" = "yes" || test "$ENABLED_STRONGSWAN" = "yes" || \
    test "$ENABLED_OPENLDAP" = "yes" || test "x$ENABLED_MOSQUITTO" = "xyes" || \
-   test "$ENABLED_HITCH" = "yes" || test "$ENABLED_NGINX" = "yes"
+   test "$ENABLED_HITCH" = "yes" || test "$ENABLED_NGINX" = "yes" || \
+   test "$ENABLED_LIBEVENT" = "yes"
 then
     ENABLED_OPENSSLALL="yes"
 fi
@@ -10678,7 +10686,8 @@ if test "$ENABLED_OPENSSH" = "yes" || test "$ENABLED_NGINX" = "yes" || \
    test "$ENABLED_LIBWEBSOCKETS" = "yes" || \
    test "x$ENABLED_LIGHTY" = "xyes" || test "$ENABLED_LIBSSH2" = "yes" || \
    test "x$ENABLED_NTP" = "xyes" || test "$ENABLED_RSYSLOG" = "yes" || \
-   test "$ENABLED_OPENLDAP" = "yes" || test "$ENABLED_HITCH" = "yes" || test "x$ENABLED_MOSQUITTO" = "xyes"
+   test "$ENABLED_OPENLDAP" = "yes" || test "$ENABLED_HITCH" = "yes" || \
+   test "x$ENABLED_MOSQUITTO" = "xyes" || test "$ENABLED_LIBEVENT" = "yes"
 then
     ENABLED_OPENSSLEXTRA="yes"
 fi
@@ -11453,6 +11462,7 @@ AS_IF([test "$ENABLED_ASM" = "no" && (test "$ENABLED_INTELASM" != "no" || \
 # test scripts for make check.
 AM_CONDITIONAL([BUILD_DISTRO],[test "x$ENABLED_DISTRO" = "xyes"])
 AM_CONDITIONAL([BUILD_OPENSSL_COMPAT],[test "x$ENABLED_OPENSSLEXTRA" != "xnoinstall"])
+AM_CONDITIONAL([BUILD_LIBEVENT],[test "x$ENABLED_LIBEVENT" = "xyes"])
 AM_CONDITIONAL([BUILD_ALL],[test "x$ENABLED_ALL" = "xyes"])
 AM_CONDITIONAL([BUILD_TLS13],[test "x$ENABLED_TLS13" = "xyes" || test "x$ENABLED_USERSETTINGS" = "xyes"])
 AM_CONDITIONAL([BUILD_RNG],[test "x$ENABLED_RNG" = "xyes" || test "x$ENABLED_USERSETTINGS" = "xyes"])
@@ -12098,6 +12108,7 @@ echo "   * strongSwan:                 $ENABLED_STRONGSWAN"
 echo "   * OpenLDAP:                   $ENABLED_OPENLDAP"
 echo "   * hitch:                      $ENABLED_HITCH"
 echo "   * memcached:                  $ENABLED_MEMCACHED"
+echo "   * libevent:                   $ENABLED_LIBEVENT"
 echo "   * Mosquitto                   $ENABLED_MOSQUITTO"
 echo "   * ERROR_STRINGS:              $ENABLED_ERROR_STRINGS"
 echo "   * DTLS:                       $ENABLED_DTLS"
