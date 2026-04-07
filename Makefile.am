@@ -324,35 +324,39 @@ wc_egs:
 	$(MAKE) wolfcrypt/test/testwolfcrypt; \
 	$(MAKE) wolfcrypt/benchmark/benchmark;
 
-install-exec-local:	install-generic-config install-libevent-compat
+install-exec-local:	install-generic-config
 
 install-generic-config:
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
 	$(INSTALL_SCRIPT) @GENERIC_CONFIG@ $(DESTDIR)$(bindir)
 
 if BUILD_LIBEVENT
-install-libevent-compat:
+install-exec-hook:
 	@echo "Installing OpenSSL drop-in compatibility symlinks for libevent..."
 	@if [ ! -e "$(DESTDIR)$(includedir)/openssl" ]; then \
 		ln -sf wolfssl/openssl "$(DESTDIR)$(includedir)/openssl"; \
 		echo "  $(DESTDIR)$(includedir)/openssl -> wolfssl/openssl"; \
 	fi
-	@if [ -f "$(DESTDIR)$(libdir)/libwolfssl.a" ] && [ ! -e "$(DESTDIR)$(libdir)/libssl.a" ]; then \
+if BUILD_STATIC
+	@if [ ! -e "$(DESTDIR)$(libdir)/libssl.a" ]; then \
 		ln -sf libwolfssl.a "$(DESTDIR)$(libdir)/libssl.a"; \
 		echo "  $(DESTDIR)$(libdir)/libssl.a -> libwolfssl.a"; \
 	fi
-	@if [ -f "$(DESTDIR)$(libdir)/libwolfssl.a" ] && [ ! -e "$(DESTDIR)$(libdir)/libcrypto.a" ]; then \
+	@if [ ! -e "$(DESTDIR)$(libdir)/libcrypto.a" ]; then \
 		ln -sf libwolfssl.a "$(DESTDIR)$(libdir)/libcrypto.a"; \
 		echo "  $(DESTDIR)$(libdir)/libcrypto.a -> libwolfssl.a"; \
 	fi
-	@if [ -f "$(DESTDIR)$(libdir)/libwolfssl.so" ] && [ ! -e "$(DESTDIR)$(libdir)/libssl.so" ]; then \
+endif
+if BUILD_SHARED
+	@if [ ! -e "$(DESTDIR)$(libdir)/libssl.so" ]; then \
 		ln -sf libwolfssl.so "$(DESTDIR)$(libdir)/libssl.so"; \
 		echo "  $(DESTDIR)$(libdir)/libssl.so -> libwolfssl.so"; \
 	fi
-	@if [ -f "$(DESTDIR)$(libdir)/libwolfssl.so" ] && [ ! -e "$(DESTDIR)$(libdir)/libcrypto.so" ]; then \
+	@if [ ! -e "$(DESTDIR)$(libdir)/libcrypto.so" ]; then \
 		ln -sf libwolfssl.so "$(DESTDIR)$(libdir)/libcrypto.so"; \
 		echo "  $(DESTDIR)$(libdir)/libcrypto.so -> libwolfssl.so"; \
 	fi
+endif
 	@if [ -f "$(DESTDIR)$(libdir)/pkgconfig/wolfssl.pc" ]; then \
 		for pc in openssl.pc libssl.pc libcrypto.pc; do \
 			if [ ! -e "$(DESTDIR)$(libdir)/pkgconfig/$$pc" ]; then \
@@ -361,18 +365,20 @@ install-libevent-compat:
 			fi; \
 		done; \
 	fi
-else
-install-libevent-compat:
 endif
 
 uninstall-local:
 	-rm -f $(DESTDIR)$(bindir)/@GENERIC_CONFIG@
 if BUILD_LIBEVENT
 	-rm -f $(DESTDIR)$(includedir)/openssl
+if BUILD_STATIC
 	-rm -f $(DESTDIR)$(libdir)/libssl.a
 	-rm -f $(DESTDIR)$(libdir)/libcrypto.a
+endif
+if BUILD_SHARED
 	-rm -f $(DESTDIR)$(libdir)/libssl.so
 	-rm -f $(DESTDIR)$(libdir)/libcrypto.so
+endif
 	-rm -f $(DESTDIR)$(libdir)/pkgconfig/openssl.pc
 	-rm -f $(DESTDIR)$(libdir)/pkgconfig/libssl.pc
 	-rm -f $(DESTDIR)$(libdir)/pkgconfig/libcrypto.pc

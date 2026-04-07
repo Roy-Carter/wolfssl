@@ -11463,6 +11463,8 @@ AS_IF([test "$ENABLED_ASM" = "no" && (test "$ENABLED_INTELASM" != "no" || \
 AM_CONDITIONAL([BUILD_DISTRO],[test "x$ENABLED_DISTRO" = "xyes"])
 AM_CONDITIONAL([BUILD_OPENSSL_COMPAT],[test "x$ENABLED_OPENSSLEXTRA" != "xnoinstall"])
 AM_CONDITIONAL([BUILD_LIBEVENT],[test "x$ENABLED_LIBEVENT" = "xyes"])
+AM_CONDITIONAL([BUILD_STATIC],[test "x$enable_static" = "xyes"])
+AM_CONDITIONAL([BUILD_SHARED],[test "x$enable_shared" = "xyes"])
 AM_CONDITIONAL([BUILD_ALL],[test "x$ENABLED_ALL" = "xyes"])
 AM_CONDITIONAL([BUILD_TLS13],[test "x$ENABLED_TLS13" = "xyes" || test "x$ENABLED_USERSETTINGS" = "xyes"])
 AM_CONDITIONAL([BUILD_RNG],[test "x$ENABLED_RNG" = "xyes" || test "x$ENABLED_USERSETTINGS" = "xyes"])
