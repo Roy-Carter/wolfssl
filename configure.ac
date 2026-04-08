@@ -2789,8 +2789,7 @@ if test "$ENABLED_LIBWEBSOCKETS" = "yes" || test "$ENABLED_OPENVPN" = "yes" || \
    test "$ENABLED_KRB" = "yes" || test "$ENABLED_CHRONY" = "yes" || \
    test "$ENABLED_FFMPEG" = "yes" || test "$ENABLED_STRONGSWAN" = "yes" || \
    test "$ENABLED_OPENLDAP" = "yes" || test "x$ENABLED_MOSQUITTO" = "xyes" || \
-   test "$ENABLED_HITCH" = "yes" || test "$ENABLED_NGINX" = "yes" || \
-   test "$ENABLED_LIBEVENT" = "yes"
+   test "$ENABLED_HITCH" = "yes" || test "$ENABLED_NGINX" = "yes"
 then
     ENABLED_OPENSSLALL="yes"
 fi
@@ -10695,9 +10694,15 @@ if test "$ENABLED_OPENSSH" = "yes" || test "$ENABLED_NGINX" = "yes" || \
    test "x$ENABLED_LIGHTY" = "xyes" || test "$ENABLED_LIBSSH2" = "yes" || \
    test "x$ENABLED_NTP" = "xyes" || test "$ENABLED_RSYSLOG" = "yes" || \
    test "$ENABLED_OPENLDAP" = "yes" || test "$ENABLED_HITCH" = "yes" || \
-   test "x$ENABLED_MOSQUITTO" = "xyes" || test "$ENABLED_LIBEVENT" = "yes"
+   test "x$ENABLED_MOSQUITTO" = "xyes"
 then
     ENABLED_OPENSSLEXTRA="yes"
+fi
+
+if test "$ENABLED_LIBEVENT" = "yes"; then
+    if test "$ENABLED_OPENSSLALL" != "yes" || test "$ENABLED_OPENSSLEXTRA" != "yes"; then
+        AC_MSG_ERROR([--enable-libevent requires --enable-opensslall and --enable-opensslextra])
+    fi
 fi
 
 if test "$ENABLED_CURVE25519" != "no" && test "$ENABLED_CURVE25519" != "asm" && test "$KERNEL_MODE_DEFAULTS" = "yes"
