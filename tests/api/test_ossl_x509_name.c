@@ -715,3 +715,48 @@ int test_wolfSSL_X509_NAME_ENTRY_get_object(void)
     return EXPECT_RESULT();
 }
 
+int test_wolfSSL_X509_check_issued(void)
+{
+    EXPECT_DECLS;
+#if defined(OPENSSL_EXTRA) && !defined(NO_CERTS) && !defined(NO_FILESYSTEM) && \
+    !defined(NO_RSA)
+    X509* ca = NULL;
+    X509* server = NULL;
+    X509* client = NULL;
+
+    ExpectIntEQ(X509_check_issued(NULL, NULL),
+        WOLFSSL_X509_V_ERR_SUBJECT_ISSUER_MISMATCH);
+
+    ExpectNotNull(ca = wolfSSL_X509_load_certificate_file(caCertFile,
+        WOLFSSL_FILETYPE_PEM));
+    ExpectNotNull(server = wolfSSL_X509_load_certificate_file(svrCertFile,
+        WOLFSSL_FILETYPE_PEM));
+    ExpectNotNull(client = wolfSSL_X509_load_certificate_file(cliCertFile,
+        WOLFSSL_FILETYPE_PEM));
+
+    ExpectIntEQ(X509_check_issued(ca, NULL),
+        WOLFSSL_X509_V_ERR_SUBJECT_ISSUER_MISMATCH);
+    ExpectIntEQ(X509_check_issued(NULL, server),
+        WOLFSSL_X509_V_ERR_SUBJECT_ISSUER_MISMATCH);
+
+    /* CA self-signed: issuer of self equals self. */
+    ExpectIntEQ(X509_check_issued(ca, ca), WOLFSSL_X509_V_OK);
+
+    /* Real chain: server is signed by ca. Compares DER raw[] DN. */
+    ExpectIntEQ(X509_check_issued(ca, server), WOLFSSL_X509_V_OK);
+
+    /* Wrong direction: ca's issuer is itself, not server. */
+    ExpectIntEQ(X509_check_issued(server, ca),
+        WOLFSSL_X509_V_ERR_SUBJECT_ISSUER_MISMATCH);
+
+    /* Unrelated pair: client cert issuer != server's subject. */
+    ExpectIntEQ(X509_check_issued(server, client),
+        WOLFSSL_X509_V_ERR_SUBJECT_ISSUER_MISMATCH);
+
+    X509_free(client);
+    X509_free(server);
+    X509_free(ca);
+#endif
+    return EXPECT_RESULT();
+}
+

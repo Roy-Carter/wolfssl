@@ -15874,22 +15874,58 @@ WOLF_STACK_OF(WOLFSSL_STRING) *wolfSSL_X509_get1_ca_issuers(WOLFSSL_X509 *x)
 
 int wolfSSL_X509_check_issued(WOLFSSL_X509 *issuer, WOLFSSL_X509 *subject)
 {
-    WOLFSSL_X509_NAME *issuerName = wolfSSL_X509_get_issuer_name(subject);
-    WOLFSSL_X509_NAME *subjectName = wolfSSL_X509_get_subject_name(issuer);
+    WOLFSSL_X509_NAME *issuerName;
+    WOLFSSL_X509_NAME *subjectName;
 
-    if (issuerName == NULL || subjectName == NULL)
-        return WOLFSSL_X509_V_ERR_SUBJECT_ISSUER_MISMATCH;
+    WOLFSSL_ENTER("wolfSSL_X509_check_issued");
 
-    /* Literal matching of encoded names and key ids. */
-    if (issuerName->sz != subjectName->sz ||
-           XMEMCMP(issuerName->name, subjectName->name, subjectName->sz) != 0) {
+    if (issuer == NULL || subject == NULL) {
+        WOLFSSL_MSG("check_issued: NULL X509");
         return WOLFSSL_X509_V_ERR_SUBJECT_ISSUER_MISMATCH;
     }
 
+    issuerName = wolfSSL_X509_get_issuer_name(subject);
+    subjectName = wolfSSL_X509_get_subject_name(issuer);
+
+    if (issuerName == NULL || subjectName == NULL) {
+        WOLFSSL_MSG("check_issued: NULL X509_NAME");
+        return WOLFSSL_X509_V_ERR_SUBJECT_ISSUER_MISMATCH;
+    }
+
+    /* Prefer canonical DER (raw[]) comparison to match OpenSSL semantics
+     * (X509_NAME_cmp on DER). The one-line `name` string is lazily built
+     * and can differ for two encodings of the same DN, producing false
+     * mismatch on valid chains. It can also be left in a partially
+     * populated state by some build configurations, so a NULL/size guard
+     * is required before XMEMCMP either way. */
+#if defined(OPENSSL_ALL) || defined(WOLFSSL_NGINX) || defined(HAVE_LIGHTY)
+    if (issuerName->rawLen > 0 && subjectName->rawLen > 0) {
+        if (issuerName->rawLen != subjectName->rawLen ||
+            XMEMCMP(issuerName->raw, subjectName->raw,
+                    (size_t)subjectName->rawLen) != 0) {
+            WOLFSSL_MSG("check_issued: DER raw DN mismatch");
+            return WOLFSSL_X509_V_ERR_SUBJECT_ISSUER_MISMATCH;
+        }
+    }
+    else
+#endif
+    {
+        if (issuerName->name == NULL || subjectName->name == NULL ||
+            issuerName->sz <= 0 ||
+            issuerName->sz != subjectName->sz ||
+            XMEMCMP(issuerName->name, subjectName->name,
+                    (size_t)subjectName->sz) != 0) {
+            WOLFSSL_MSG("check_issued: one-line DN mismatch / NULL");
+            return WOLFSSL_X509_V_ERR_SUBJECT_ISSUER_MISMATCH;
+        }
+    }
+
     if (subject->authKeyId != NULL && issuer->subjKeyId != NULL) {
-        if (subject->authKeyIdSz != issuer->subjKeyIdSz ||
+        if (subject->authKeyIdSz == 0 || issuer->subjKeyIdSz == 0 ||
+                subject->authKeyIdSz != issuer->subjKeyIdSz ||
                 XMEMCMP(subject->authKeyId, issuer->subjKeyId,
-                        issuer->subjKeyIdSz) != 0) {
+                        (size_t)issuer->subjKeyIdSz) != 0) {
+            WOLFSSL_MSG("check_issued: AKI/SKI mismatch");
             return WOLFSSL_X509_V_ERR_SUBJECT_ISSUER_MISMATCH;
         }
     }
