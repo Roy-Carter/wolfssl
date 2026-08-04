@@ -4785,6 +4785,22 @@ int wolfSSL_want_write(WOLFSSL*);
 int wolfSSL_check_domain_name(WOLFSSL* ssl, const char* dn);
 
 /*!
+    \ingroup Setup
+
+    \brief wolfSSL_connect() または wolfSSL_accept() の前にこの関数を呼ぶと、
+    ピア証明書の SAN iPAddress エントリに対する IP アドレス検証を追加します。
+
+    \return SSL_SUCCESS 成功。
+    \return SSL_FAILURE パラメータ不正またはメモリ確保失敗。
+
+    \param ssl wolfSSL_new() で作成された WOLFSSL 構造体へのポインタ。
+    \param ipaddr 検証する NULL 終端 ASCII IP アドレス文字列。
+
+    \sa wolfSSL_check_domain_name
+*/
+int wolfSSL_check_ip_address(WOLFSSL* ssl, const char* ipaddr);
+
+/*!
     \ingroup TLS
     \brief  使用するためにWolfSSLライブラリを初期化します。アプリケーションごとに1回、その他のライブラリへの呼び出しの前に呼び出す必要があります。
     \return SSL_SUCCESS  成功した場合に返されます。、通話が戻ります。
