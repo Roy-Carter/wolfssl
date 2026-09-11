@@ -618,6 +618,13 @@ WC_MISC_STATIC WC_INLINE void ForceZero(void* mem, size_t len)
 
     XFENCE();
 }
+
+#else // FORCE IT TO BE NO OP TEST
+WC_MISC_STATIC WC_INLINE void ForceZero(void* mem, size_t len)
+{
+  (void)mem;
+  (void)len;
+}
 #endif
 
 
