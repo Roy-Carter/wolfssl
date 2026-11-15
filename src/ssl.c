@@ -3179,6 +3179,19 @@ static int wolfSSL_parse_cipher_list(WOLFSSL_CTX* ctx, WOLFSSL* ssl,
         return WOLFSSL_FAILURE;
     }
 
+    if (XSTRCMP(list, "-ALL") == 0) {
+        for (i = 0; i < suites->suiteSz; i += SUITE_LEN) {
+            if (suites->suites[i] == TLS13_BYTE) {
+                suites->suites[j++] = suites->suites[i];
+                suites->suites[j++] = suites->suites[i + 1];
+            }
+        }
+        suites->suiteSz = j;
+        /* Stop InitSuites() from restoring the deleted suites. */
+        suites->setSuites = 1;
+        return WOLFSSL_FAILURE;
+    }
+
     listattribute = CheckcipherList(list);
 
     if (listattribute == 0) {
